@@ -35,6 +35,7 @@
 		5C08F2DB1961D7F300CB66A7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/Main.storyboard; sourceTree = "<group>"; };
 		5C1C12E21A095D79006F4E27 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		5C1C12E31A095DA4006F4E27 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		5C1C12E41A0962D9006F4E27 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		5CC6F24019619D3D00C767E3 /* CFCoronaKnob.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CFCoronaKnob.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5CC6F24319619D3D00C767E3 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		5CC6F24519619D3D00C767E3 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -81,6 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				5C1C12E31A095DA4006F4E27 /* README.md */,
+				5C1C12E41A0962D9006F4E27 /* LICENSE */,
 				5C1C12E21A095D79006F4E27 /* .gitignore */,
 				5CC6F24919619D3D00C767E3 /* Source */,
 				5CC6F24219619D3D00C767E3 /* Frameworks */,
