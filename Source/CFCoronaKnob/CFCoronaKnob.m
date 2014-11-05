@@ -2,7 +2,7 @@
 //  File:		CFCoronaKnob.m
 //  Author:		Christian Floisand
 //	Created:	2014-06-30
-//	Modified:	2014-11-04
+//	Modified:	2014-11-05
 //
 
 #import <QuartzCore/QuartzCore.h>
@@ -35,7 +35,6 @@
 	CGFloat _prevValue;
 	CGFloat _angleDiff;
     CGFloat _radius;
-    CGRect _labelRect;
     
     BOOL _isDragging;
     CGFloat _dragCounter;
@@ -80,7 +79,6 @@
         _radius = self.bounds.size.width / 2.f - _coronaWidth;
 		_prevValue = _value;
         
-        _labelRect = self.bounds;
         _isDragging = NO;
         _tapped = YES;
         _dragCounter = 0.f;
@@ -247,6 +245,20 @@
 {
     _knobBackgroundColor = knobBackgroundColor;
     _backgroundLayer.fillColor = knobBackgroundColor.CGColor;
+}
+
+- (void)setFrame:(CGRect)frame
+{
+    NSAssert(frame.size.width == frame.size.height, @"Corona Knob's width and height must be the same.");
+    super.frame = frame;
+    _radius = self.bounds.size.width / 2.f - _coronaWidth;
+}
+
+- (void)setBounds:(CGRect)bounds
+{
+    NSAssert(bounds.size.width == bounds.size.height, @"Corona Knob's width and height must be the same.");
+    super.bounds = bounds;
+    _radius = self.bounds.size.width / 2.f - _coronaWidth;
 }
 
 - (void)setBackgroundColor:(UIColor *)backgroundColor
