@@ -39,7 +39,6 @@
     BOOL _isDragging;
     CGFloat _dragCounter;
 }
-@property (nonatomic, copy) CGFloat (^calcRadius)(void);
 @property (nonatomic, copy) CGFloat (^calcStartEndAngleDiff)(void);
 @end
 
@@ -85,12 +84,6 @@
         _dragCounter = 0.f;
         
         __weak typeof(self) weakSelf = self;
-        
-        _calcRadius = ^CGFloat (void) {
-            typeof(self) strongSelf = weakSelf;
-            return strongSelf.bounds.size.width / 2.f - strongSelf->_coronaWidth;
-        };
-        
         _calcStartEndAngleDiff = ^CGFloat (void) {
             typeof(self) strongSelf = weakSelf;
             if (fabsf(strongSelf.endAngle - strongSelf.startAngle) < FLT_MIN) {
@@ -258,14 +251,14 @@
 {
     NSAssert(frame.size.width == frame.size.height, @"Corona Knob's width and height must be the same.");
     super.frame = frame;
-    _radius = self.calcRadius();
+    _radius = self.bounds.size.width / 2.f - _coronaWidth;
 }
 
 - (void)setBounds:(CGRect)bounds
 {
     NSAssert(bounds.size.width == bounds.size.height, @"Corona Knob's width and height must be the same.");
     super.bounds = bounds;
-    _radius = self.calcRadius();
+    _radius = self.bounds.size.width / 2.f - _coronaWidth;
 }
 
 - (void)setBackgroundColor:(UIColor *)backgroundColor
@@ -477,7 +470,7 @@
     
     if (completedPath) {
         CABasicAnimation *fadeAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
-        fadeAnimation.duration = 0.160;
+        fadeAnimation.duration = 0.16;
         fadeAnimation.fromValue = @(1.0);
         fadeAnimation.toValue = @(0.0);
         fadeAnimation.fillMode = kCAFillModeForwards;
@@ -488,6 +481,7 @@
         
         // Wait until the animation group has completed before setting the corona to its actual path. Setting the completed path
         // in the completion block of a UIView animation block does not work.
+        // NOTE: Subtracting small value from duration to prevent the corona from briefly blinking when setting the final path.
         // FIXME: User interaction is turned off temporarily so that the following block does not overwrite a new value/path with the
         // completed path from the previous touch interaction. But it's preferred not to block actions, even for a very short time.
         self.userInteractionEnabled = NO;
