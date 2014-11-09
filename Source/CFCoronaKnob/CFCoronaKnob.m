@@ -2,7 +2,7 @@
 //  File:		CFCoronaKnob.m
 //  Author:		Christian Floisand
 //	Created:	2014-06-30
-//	Modified:	2014-11-05
+//	Modified:	2014-11-09
 //
 
 #import <QuartzCore/QuartzCore.h>
@@ -39,6 +39,7 @@
     BOOL _isDragging;
     CGFloat _dragCounter;
 }
+@property (nonatomic, copy) CGFloat (^calcRadius)(void);
 @property (nonatomic, copy) CGFloat (^calcStartEndAngleDiff)(void);
 @end
 
@@ -84,6 +85,12 @@
         _dragCounter = 0.f;
         
         __weak typeof(self) weakSelf = self;
+        
+        _calcRadius = ^CGFloat (void) {
+            typeof(self) strongSelf = weakSelf;
+            return strongSelf.bounds.size.width / 2.f - strongSelf->_coronaWidth;
+        };
+        
         _calcStartEndAngleDiff = ^CGFloat (void) {
             typeof(self) strongSelf = weakSelf;
             if (fabsf(strongSelf.endAngle - strongSelf.startAngle) < FLT_MIN) {
@@ -251,14 +258,14 @@
 {
     NSAssert(frame.size.width == frame.size.height, @"Corona Knob's width and height must be the same.");
     super.frame = frame;
-    _radius = self.bounds.size.width / 2.f - _coronaWidth;
+    _radius = self.calcRadius();
 }
 
 - (void)setBounds:(CGRect)bounds
 {
     NSAssert(bounds.size.width == bounds.size.height, @"Corona Knob's width and height must be the same.");
     super.bounds = bounds;
-    _radius = self.bounds.size.width / 2.f - _coronaWidth;
+    _radius = self.calcRadius();
 }
 
 - (void)setBackgroundColor:(UIColor *)backgroundColor
@@ -464,15 +471,15 @@
     CABasicAnimation *strokeAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
     strokeAnimation.duration = CORONA_ANIMATION_DURATION;
     strokeAnimation.fromValue = @(fromValue);
-    strokeAnimation.toValue = @(1.f);
+    strokeAnimation.toValue = @(1.0);
     strokeAnimation.fillMode = kCAFillModeForwards;
-    strokeAnimation.beginTime = 0.f;
+    strokeAnimation.beginTime = 0.0;
     
     if (completedPath) {
         CABasicAnimation *fadeAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
-        fadeAnimation.duration = 0.16f;
-        fadeAnimation.fromValue = @(1.f);
-        fadeAnimation.toValue = @(0.f);
+        fadeAnimation.duration = 0.160;
+        fadeAnimation.fromValue = @(1.0);
+        fadeAnimation.toValue = @(0.0);
         fadeAnimation.fillMode = kCAFillModeForwards;
         fadeAnimation.beginTime = strokeAnimation.beginTime + strokeAnimation.duration;
         
@@ -484,7 +491,7 @@
         // FIXME: User interaction is turned off temporarily so that the following block does not overwrite a new value/path with the
         // completed path from the previous touch interaction. But it's preferred not to block actions, even for a very short time.
         self.userInteractionEnabled = NO;
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(coronaAnimation.duration * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)((coronaAnimation.duration-0.04) * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             _coronaLayer.path = completedPath.CGPath;
             self.userInteractionEnabled = YES;
         });
