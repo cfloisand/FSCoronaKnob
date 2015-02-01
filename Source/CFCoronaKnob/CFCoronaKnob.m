@@ -2,7 +2,7 @@
 //  File:		CFCoronaKnob.m
 //  Author:		Christian Floisand
 //	Created:	2014-06-30
-//	Modified:	2014-11-09
+//	Modified:	2015-02-01
 //
 
 #import <QuartzCore/QuartzCore.h>
@@ -16,7 +16,7 @@
 
 #define DEFAULT_START_ANGLE		THREEPI_OVER2
 #define DEFAULT_END_ANGLE		THREEPI_OVER2
-#define DEFAULT_VALUE			0.f
+#define DEFAULT_KNOB_VALUE		0.f
 #define DEFAULT_TAP_INCREMENT	0.25f
 #define DEFAULT_DRAG_INCREMENT  0.01f
 #define DEFAULT_DRAG_SENSITIVITY 1.f
@@ -26,11 +26,10 @@
 #define DEFAULT_KNOB_WIDTH		4.f
 #define DEFAULT_CORONA_WIDTH    4.f
 
+#define PRACTICALLY_ZERO(num)   ((num) < FLT_MIN)
 
-// TODO: Floating-point equality needs to use approximation.
 
-@interface CFCoronaKnob ()
-{
+@interface CFCoronaKnob () {
     CGPoint _centerPoint;
 	CGFloat _prevValue;
 	CGFloat _angleDiff;
@@ -66,7 +65,7 @@
         _startAngle = DEFAULT_START_ANGLE;
 		_endAngle = DEFAULT_END_ANGLE;
 		_angleDiff = TWOPI - ANGLE_DIFF_OFFSET;
-        _value = DEFAULT_VALUE;
+        _value = DEFAULT_KNOB_VALUE;
         _tapIncrement = DEFAULT_TAP_INCREMENT;
         _dragIncrement = DEFAULT_DRAG_INCREMENT;
         _dragSensitivity = DEFAULT_DRAG_SENSITIVITY;
@@ -87,7 +86,7 @@
         _calcStartEndAngleDiff = ^CGFloat (void) {
             typeof(self) strongSelf = weakSelf;
             if (fabsf(strongSelf.endAngle - strongSelf.startAngle) < FLT_MIN) {
-                // Subtract small value to prevent corona wrapping when startAngle and endAngle are the same.
+                // NOTE: Prevents value wrapping when startAngle and endAngle are the same.
                 return (TWOPI - ANGLE_DIFF_OFFSET);
             } else {
                 CGFloat diff = strongSelf.endAngle - strongSelf.startAngle;
@@ -155,6 +154,13 @@
 - (CGSize)intrinsicContentSize
 {
     return self.frame.size;
+}
+
+- (void)setNeedsDisplay
+{
+    [self cf_updateCoronaStringForValue];
+    [self cf_updateCoronaColorForValue];
+    [super setNeedsDisplay];
 }
 
 #pragma mark - Properties
@@ -269,7 +275,7 @@
 
 - (void)setOpaque:(BOOL)opaque
 {
-    // Allowing the opaque property to be YES would mess up drawing of the control.
+    // NOTE: Allowing the opaque property to be YES would mess up drawing of the control.
     super.opaque = NO;
 }
 
@@ -423,7 +429,6 @@
 	
 	_coronaLayer.path = [[self cf_coronaPathWithOffset:0.f] CGPath];
 	[_coronaLayer setNeedsDisplay];
-	
 	_prevValue = _value;
 }
 
@@ -439,7 +444,7 @@
     UIBezierPath *completedPath = nil;
     CGFloat fromValue;
     
-    if (_value == 0.f) {
+    if (PRACTICALLY_ZERO(_value)) {
         // When the knob's value is 0.0, the corona path should still visually complete its animation before disappearing.
         // The path returned needs to be offset by a small amount so it will still be drawn, but the actual path corresponding to the
         // value of 0.0 is saved as |completedPath| and set to the layer after the animation is completed.
@@ -482,8 +487,6 @@
         // Wait until the animation group has completed before setting the corona to its actual path. Setting the completed path
         // in the completion block of a UIView animation block does not work.
         // NOTE: Subtracting small value from duration to prevent the corona from briefly blinking when setting the final path.
-        // FIXME: User interaction is turned off temporarily so that the following block does not overwrite a new value/path with the
-        // completed path from the previous touch interaction. But it's preferred not to block actions, even for a very short time.
         self.userInteractionEnabled = NO;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)((coronaAnimation.duration-0.04) * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             _coronaLayer.path = completedPath.CGPath;
@@ -495,7 +498,6 @@
     }
     
     [_coronaLayer addAnimation:coronaAnimation forKey:@"coronaAnimation"];
-    
 	_prevValue = _value;
 }
 
