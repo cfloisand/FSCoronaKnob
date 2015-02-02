@@ -13,6 +13,7 @@
 #define ANGLE_EPSILON (0.00001f)
 #define VALUE_MIN (0.0001f)
 #define CORONA_ANIMATION_DURATION (0.24f)
+#define CORONA_ANIMATION_KEY    @"coronaAnimation"
 #define HIGHLIGHT_LAYER_OPACITY (0.52f)
 
 #define DEFAULT_START_ANGLE		THREEPI_OVER2
@@ -28,6 +29,7 @@
 #define DEFAULT_CORONA_WIDTH    4.f
 
 #define PRACTICALLY_ZERO(num)   (((num) < VALUE_MIN) || (fabsf(1.f - (num)) < VALUE_MIN))
+#define PRACTICALLY_EQUAL(num1, num2) (fabsf((num1) - (num2)) < ANGLE_EPSILON)
 
 
 @interface CFCoronaKnob () {
@@ -150,6 +152,10 @@
     [self.layer addSublayer:coronaLayer];
     _coronaLayer = coronaLayer;
     _coronaLayer.strokeEnd = 0.f;
+    // NOTE: Turn off implicit animation for strokeColor, because it will interfere with
+    // the corona path animation for the special case when the knob is touched during animation
+    // when the value returns to 0. See note in draw animated method.
+    _coronaLayer.actions = @{@"strokeColor": [NSNull null]};
     
     // Value label added last as a subview so it appears over the top of the other layers.
     UILabel *valueLabel = [[UILabel alloc] init];
@@ -440,8 +446,7 @@
     BOOL valueWrapped = NO;
     CGFloat strokeTarget = _value;
     
-    if (PRACTICALLY_ZERO(_value)) {
-        _value = 0.f;
+    if (PRACTICALLY_ZERO(_value) && PRACTICALLY_EQUAL(_startAngle, _endAngle)) {
         valueIsZero = YES;
         strokeTarget = _endAngle - ANGLE_EPSILON;
     } else if (_value < _prevValue) {
@@ -449,6 +454,12 @@
         strokeTarget = _endAngle - ANGLE_EPSILON;
     }
     
+    // NOTE: Removing an animation that may currently be running from a previous tap
+    // ensures correct animation. E.g. when the value is 0 (and the start/end anges are the same),
+    // the animation would otherwise be interpolated in reverse to reach the current value
+    // set for this tap.
+    if ([_coronaLayer animationForKey:CORONA_ANIMATION_KEY])
+        [_coronaLayer removeAnimationForKey:CORONA_ANIMATION_KEY];
     _coronaLayer.strokeEnd = _value;
 	
     CAAnimationGroup *coronaAnimation = [CAAnimationGroup animation];
@@ -484,7 +495,7 @@
         coronaAnimation.duration = strokeAnimation.duration;
     }
     
-    [_coronaLayer addAnimation:coronaAnimation forKey:@"coronaAnimation"];
+    [_coronaLayer addAnimation:coronaAnimation forKey:CORONA_ANIMATION_KEY];
 	_prevValue = _value;
 }
 
