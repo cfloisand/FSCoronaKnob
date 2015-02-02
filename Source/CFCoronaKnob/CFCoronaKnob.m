@@ -2,7 +2,7 @@
 //  File:		CFCoronaKnob.m
 //  Author:		Christian Floisand
 //	Created:	2014-06-30
-//	Modified:	2015-02-01
+//	Modified:	2015-02-02
 //
 
 #import <QuartzCore/QuartzCore.h>
@@ -10,7 +10,8 @@
 
 #define TWOPI (6.2831853071795865)
 #define THREEPI_OVER2 (4.71238898038469)
-#define ANGLE_DIFF_OFFSET (0.00001f)
+#define ANGLE_EPSILON (0.00001f)
+#define VALUE_MIN (0.0001f)
 #define CORONA_ANIMATION_DURATION (0.24f)
 #define HIGHLIGHT_LAYER_OPACITY (0.52f)
 
@@ -26,19 +27,19 @@
 #define DEFAULT_KNOB_WIDTH		4.f
 #define DEFAULT_CORONA_WIDTH    4.f
 
-#define PRACTICALLY_ZERO(num)   ((num) < FLT_MIN)
+#define PRACTICALLY_ZERO(num)   (((num) < VALUE_MIN) || (fabsf(1.f - (num)) < VALUE_MIN))
 
 
 @interface CFCoronaKnob () {
     CGPoint _centerPoint;
 	CGFloat _prevValue;
-	CGFloat _angleDiff;
+	CGFloat _angleRange;
     CGFloat _radius;
     
     BOOL _isDragging;
     CGFloat _dragCounter;
 }
-@property (nonatomic, copy) CGFloat (^calcStartEndAngleDiff)(void);
+@property (nonatomic, copy) CGFloat (^calculateAngleRange)(void);
 @end
 
 
@@ -64,7 +65,7 @@
         
         _startAngle = DEFAULT_START_ANGLE;
 		_endAngle = DEFAULT_END_ANGLE;
-		_angleDiff = TWOPI - ANGLE_DIFF_OFFSET;
+		_angleRange = TWOPI - ANGLE_EPSILON;
         _value = DEFAULT_KNOB_VALUE;
         _tapIncrement = DEFAULT_TAP_INCREMENT;
         _dragIncrement = DEFAULT_DRAG_INCREMENT;
@@ -83,17 +84,17 @@
         _dragCounter = 0.f;
         
         __weak typeof(self) weakSelf = self;
-        _calcStartEndAngleDiff = ^CGFloat (void) {
+        _calculateAngleRange = ^CGFloat (void) {
             typeof(self) strongSelf = weakSelf;
             if (fabsf(strongSelf.endAngle - strongSelf.startAngle) < FLT_MIN) {
                 // NOTE: Prevents value wrapping when startAngle and endAngle are the same.
-                return (TWOPI - ANGLE_DIFF_OFFSET);
+                return (TWOPI - ANGLE_EPSILON);
             } else {
                 CGFloat diff = strongSelf.endAngle - strongSelf.startAngle;
                 return (diff > TWOPI ? diff-TWOPI : (diff <= 0.f ? diff+TWOPI : diff));
             }
         };
-		
+        
         self.opaque = NO;
 		self.backgroundColor = [UIColor clearColor];
     }
@@ -104,10 +105,8 @@
 {
     _centerPoint = [self.superview convertPoint:self.center toView:self];
     
-    // Setup just the background and knob layers for now, and leave the corona and highlight layers until they are needed.
-    
     CAShapeLayer *backLayer = [CAShapeLayer layer];
-    // Inset the background layer to make sure it doesn't spill out beyond the knob.
+    // NOTE: Inset the background layer to make sure it doesn't spill out beyond the knob.
     CGFloat insetAmount = MAX(_knobWidth, _coronaWidth) + 0.5f;
 	CGPathRef backPath = CGPathCreateWithEllipseInRect(CGRectInset(self.bounds, insetAmount, insetAmount), NULL);
     backLayer.frame = self.bounds;
@@ -127,12 +126,32 @@
     knobLayer.zPosition = 1.f;
     knobLayer.lineWidth = self.knobWidth;
     knobLayer.lineJoin = kCALineJoinMiter;
-    knobLayer.path = [[UIBezierPath bezierPathWithArcCenter:_centerPoint radius:_radius startAngle:0.f endAngle:TWOPI clockwise:YES] CGPath];
+    knobLayer.path = [[UIBezierPath bezierPathWithArcCenter:_centerPoint
+                                                     radius:_radius
+                                                 startAngle:0.f
+                                                   endAngle:TWOPI
+                                                  clockwise:YES] CGPath];
     [self.layer addSublayer:knobLayer];
     _knobLayer = knobLayer;
     
-    // Add the value label as subview last so it appears over the top of the other layers.
+    CAShapeLayer *coronaLayer = [CAShapeLayer layer];
+    coronaLayer.frame = self.bounds;
+    coronaLayer.strokeColor = self.coronaColor.CGColor;
+    coronaLayer.fillColor = nil;
+    coronaLayer.opacity = 1.f;
+    coronaLayer.zPosition = 2.f;
+    coronaLayer.lineWidth = self.coronaWidth;
+    coronaLayer.lineJoin = kCALineJoinMiter;
+    coronaLayer.path = [[UIBezierPath bezierPathWithArcCenter:_centerPoint
+                                                      radius:_radius
+                                                  startAngle:_startAngle
+                                                    endAngle:_endAngle - ANGLE_EPSILON
+                                                   clockwise:YES] CGPath];
+    [self.layer addSublayer:coronaLayer];
+    _coronaLayer = coronaLayer;
+    _coronaLayer.strokeEnd = 0.f;
     
+    // Value label added last as a subview so it appears over the top of the other layers.
     UILabel *valueLabel = [[UILabel alloc] init];
     valueLabel.font = [UIFont systemFontOfSize:11.f];
     valueLabel.textColor = self.coronaColor;
@@ -175,13 +194,13 @@
 - (void)setStartAngle:(CGFloat)startAngle
 {
 	_startAngle = startAngle;
-	_angleDiff = self.calcStartEndAngleDiff();
+    _angleRange = self.calculateAngleRange();
 }
 
 - (void)setEndAngle:(CGFloat)endAngle
 {
 	_endAngle = endAngle;
-	_angleDiff = self.calcStartEndAngleDiff();
+	_angleRange = self.calculateAngleRange();
 }
 
 - (void)setValue:(CGFloat)value
@@ -269,7 +288,6 @@
 
 - (void)setBackgroundColor:(UIColor *)backgroundColor
 {
-    // Disallow setting the view's background color.
     super.backgroundColor = [UIColor clearColor];
 }
 
@@ -367,8 +385,7 @@
     
     CGPoint touchPoint = [touch locationInView:self];
     
-    if ([self pointInside:touchPoint withEvent:event] && ! _isDragging) {
-        // Increment if touch up was inside the label's bounds and was not the end of a touches moved phase.
+    if ([self pointInside:touchPoint withEvent:event] && !_isDragging) {
 		if (self.value < 1.f) {
 			self.value += _tapIncrement;
 			[self cf_drawAnimateCorona];
@@ -406,92 +423,62 @@
     }
 }
 
-// Returns the bezier path for the corona based on the current value.
-- (UIBezierPath *)cf_coronaPathWithOffset:(CGFloat)offset
-{
-	CGFloat valueAngle = (_startAngle + _value * _angleDiff) - offset;
-	valueAngle = (valueAngle > TWOPI ? valueAngle-TWOPI : valueAngle);
-		
-	return [UIBezierPath bezierPathWithArcCenter:_centerPoint
-										  radius:_radius
-									  startAngle:_startAngle
-										endAngle:valueAngle
-									   clockwise:YES];
-}
-
-// For drawing the corona immediately with no animation. This method is used when the user is dragging to change
-// the knob's value.
 - (void)cf_drawImmediateCorona
 {
-	if ( ! _coronaLayer ) {
-		[self cf_initCoronaLayer];
-	}
-	
-	_coronaLayer.path = [[self cf_coronaPathWithOffset:0.f] CGPath];
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    _coronaLayer.strokeEnd = _value;
+    [CATransaction commit];
+    
 	[_coronaLayer setNeedsDisplay];
 	_prevValue = _value;
 }
 
-// For drawing the corona using animation when the user taps the knob. The corona animates from the current value to
-// the target value along the path.
 - (void)cf_drawAnimateCorona
 {
-	if ( ! _coronaLayer ) {
-		[self cf_initCoronaLayer];
-	}
-	
-    UIBezierPath *animatedPath;
-    UIBezierPath *completedPath = nil;
-    CGFloat fromValue;
+    BOOL valueIsZero = NO;
+    BOOL valueWrapped = NO;
+    CGFloat strokeTarget = _value;
     
     if (PRACTICALLY_ZERO(_value)) {
-        // When the knob's value is 0.0, the corona path should still visually complete its animation before disappearing.
-        // The path returned needs to be offset by a small amount so it will still be drawn, but the actual path corresponding to the
-        // value of 0.0 is saved as |completedPath| and set to the layer after the animation is completed.
-        animatedPath = [self cf_coronaPathWithOffset:ANGLE_DIFF_OFFSET];
-        completedPath = [self cf_coronaPathWithOffset:0.f];
-        fromValue = _prevValue;
-    } else {
-        animatedPath = [self cf_coronaPathWithOffset:0.f];
-        
-        // To prevent the corona path from snapping back during animation if the current value is less than |_tapIncrement| amount
-        // away from the maximum value of 1.0.
-        if (_value > (1.f - _tapIncrement) && _value <= 1.f) {
-            fromValue = _prevValue;
-        } else {
-            fromValue = _value;
-        }
+        _value = 0.f;
+        valueIsZero = YES;
+        strokeTarget = _endAngle - ANGLE_EPSILON;
+    } else if (_value < _prevValue) {
+        valueWrapped = YES;
+        strokeTarget = _endAngle - ANGLE_EPSILON;
     }
     
-    _coronaLayer.path = animatedPath.CGPath;
+    _coronaLayer.strokeEnd = _value;
 	
     CAAnimationGroup *coronaAnimation = [CAAnimationGroup animation];
     CABasicAnimation *strokeAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
     strokeAnimation.duration = CORONA_ANIMATION_DURATION;
-    strokeAnimation.fromValue = @(fromValue);
-    strokeAnimation.toValue = @(1.0);
+    strokeAnimation.toValue = @(strokeTarget);
     strokeAnimation.fillMode = kCAFillModeForwards;
     strokeAnimation.beginTime = 0.0;
     
-    if (completedPath) {
+    if (valueIsZero) {
+        strokeAnimation.duration *= 2;
         CABasicAnimation *fadeAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
-        fadeAnimation.duration = 0.16;
-        fadeAnimation.fromValue = @(1.0);
+        fadeAnimation.duration = strokeAnimation.duration;
         fadeAnimation.toValue = @(0.0);
         fadeAnimation.fillMode = kCAFillModeForwards;
-        fadeAnimation.beginTime = strokeAnimation.beginTime + strokeAnimation.duration;
+        fadeAnimation.beginTime = 0.0;
         
         coronaAnimation.animations = @[strokeAnimation, fadeAnimation];
         coronaAnimation.duration = strokeAnimation.duration + fadeAnimation.duration;
+    } else if (valueWrapped) {
+        strokeAnimation.duration /= 2.f;
+        CABasicAnimation *wrapAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
+        wrapAnimation.duration = CORONA_ANIMATION_DURATION;
+        wrapAnimation.fromValue = @(0.0);
+        wrapAnimation.toValue = @(_value);
+        wrapAnimation.fillMode = kCAFillModeForwards;
+        wrapAnimation.beginTime = strokeAnimation.duration;
         
-        // Wait until the animation group has completed before setting the corona to its actual path. Setting the completed path
-        // in the completion block of a UIView animation block does not work.
-        // NOTE: Subtracting small value from duration to prevent the corona from briefly blinking when setting the final path.
-        self.userInteractionEnabled = NO;
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)((coronaAnimation.duration-0.04) * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            _coronaLayer.path = completedPath.CGPath;
-            self.userInteractionEnabled = YES;
-        });
+        coronaAnimation.animations = @[strokeAnimation, wrapAnimation];
+        coronaAnimation.duration = strokeAnimation.duration + wrapAnimation.duration;
     } else {
         coronaAnimation.animations = @[strokeAnimation];
         coronaAnimation.duration = strokeAnimation.duration;
@@ -499,20 +486,6 @@
     
     [_coronaLayer addAnimation:coronaAnimation forKey:@"coronaAnimation"];
 	_prevValue = _value;
-}
-
-- (void)cf_initCoronaLayer
-{
-	CAShapeLayer *coronaLayer = [CAShapeLayer layer];
-	coronaLayer.frame = self.bounds;
-	coronaLayer.strokeColor = self.coronaColor.CGColor;
-	coronaLayer.fillColor = nil;
-    coronaLayer.opacity = 1.f;
-    coronaLayer.zPosition = 2.f;
-	coronaLayer.lineWidth = self.coronaWidth;
-	coronaLayer.lineJoin = kCALineJoinMiter;
-    [self.layer addSublayer:coronaLayer];
-	_coronaLayer = coronaLayer;
 }
 
 @end

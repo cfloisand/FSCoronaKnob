@@ -22,6 +22,7 @@
 {
     self.coronaKnob1 = [[CFCoronaKnob alloc] initWithFrame:CGRectMake(20.f, 50.f, 44.f, 44.f)];
     self.coronaKnob1.valueWrapping = CFCoronaKnobValueWrapPositive | CFCoronaKnobValueWrapNegative;
+    //self.coronaKnob1.tapIncrement = 0.15f;
     [self.coronaKnob1 addTarget:self action:@selector(knobTouch:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.coronaKnob1];
     
