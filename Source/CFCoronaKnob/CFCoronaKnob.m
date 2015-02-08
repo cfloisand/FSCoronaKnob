@@ -2,7 +2,7 @@
 //  File:		CFCoronaKnob.m
 //  Author:		Christian Floisand
 //	Created:	2014-06-30
-//	Modified:	2015-02-02
+//	Modified:	2015-02-07
 //
 
 #import <QuartzCore/QuartzCore.h>
@@ -105,68 +105,71 @@
 
 - (void)didMoveToSuperview
 {
-    _centerPoint = [self.superview convertPoint:self.center toView:self];
+    if (self.superview != nil) {
+        _centerPoint = [self.superview convertPoint:self.center toView:self];
+        
+        CAShapeLayer *backLayer = [CAShapeLayer layer];
+        // NOTE: Inset the background layer to make sure it doesn't spill out beyond the knob.
+        CGFloat insetAmount = MAX(_knobWidth, _coronaWidth) + 0.5f;
+        CGPathRef backPath = CGPathCreateWithEllipseInRect(CGRectInset(self.bounds, insetAmount, insetAmount), NULL);
+        backLayer.frame = self.bounds;
+        backLayer.fillColor = self.knobBackgroundColor.CGColor;
+        backLayer.opacity = 1.f;
+        backLayer.zPosition = 0.f;
+        backLayer.path = backPath;
+        [self.layer addSublayer:backLayer];
+        _backgroundLayer = backLayer;
+        CGPathRelease(backPath);
+        
+        CAShapeLayer *knobLayer = [CAShapeLayer layer];
+        knobLayer.frame = self.bounds;
+        knobLayer.fillColor = nil;
+        knobLayer.strokeColor = self.knobColor.CGColor;
+        knobLayer.opacity = 1.f;
+        knobLayer.zPosition = 1.f;
+        knobLayer.lineWidth = self.knobWidth;
+        knobLayer.lineJoin = kCALineJoinMiter;
+        knobLayer.path = [[UIBezierPath bezierPathWithArcCenter:_centerPoint
+                                                         radius:_radius
+                                                     startAngle:0.f
+                                                       endAngle:TWOPI
+                                                      clockwise:YES] CGPath];
+        [self.layer addSublayer:knobLayer];
+        _knobLayer = knobLayer;
+        
+        CAShapeLayer *coronaLayer = [CAShapeLayer layer];
+        coronaLayer.frame = self.bounds;
+        coronaLayer.strokeColor = self.coronaColor.CGColor;
+        coronaLayer.fillColor = nil;
+        coronaLayer.opacity = 1.f;
+        coronaLayer.zPosition = 2.f;
+        coronaLayer.lineWidth = self.coronaWidth;
+        coronaLayer.lineJoin = kCALineJoinMiter;
+        coronaLayer.path = [[UIBezierPath bezierPathWithArcCenter:_centerPoint
+                                                          radius:_radius
+                                                      startAngle:_startAngle
+                                                        endAngle:_endAngle - ANGLE_EPSILON
+                                                       clockwise:YES] CGPath];
+        [self.layer addSublayer:coronaLayer];
+        _coronaLayer = coronaLayer;
+        _coronaLayer.strokeEnd = 0.f;
+        // NOTE: Turn off implicit animation for strokeColor, because it will interfere with
+        // the corona path animation for the special case when the knob is touched during animation
+        // when the value returns to 0. See note in draw animated method.
+        _coronaLayer.actions = @{@"strokeColor": [NSNull null]};
+        
+        // Value label added last as a subview so it appears over the top of the other layers.
+        UILabel *valueLabel = [[UILabel alloc] init];
+        valueLabel.font = [UIFont systemFontOfSize:11.f];
+        valueLabel.textColor = self.coronaColor;
+        valueLabel.textAlignment = NSTextAlignmentCenter;
+        valueLabel.frame = self.bounds;
+        [self addSubview:valueLabel];
+        _valueLabel = valueLabel;
+        
+        [self cf_updateCoronaStringForValue];
+    }
     
-    CAShapeLayer *backLayer = [CAShapeLayer layer];
-    // NOTE: Inset the background layer to make sure it doesn't spill out beyond the knob.
-    CGFloat insetAmount = MAX(_knobWidth, _coronaWidth) + 0.5f;
-	CGPathRef backPath = CGPathCreateWithEllipseInRect(CGRectInset(self.bounds, insetAmount, insetAmount), NULL);
-    backLayer.frame = self.bounds;
-    backLayer.fillColor = self.knobBackgroundColor.CGColor;
-    backLayer.opacity = 1.f;
-    backLayer.zPosition = 0.f;
-    backLayer.path = backPath;
-    [self.layer addSublayer:backLayer];
-    _backgroundLayer = backLayer;
-	CGPathRelease(backPath);
-    
-    CAShapeLayer *knobLayer = [CAShapeLayer layer];
-    knobLayer.frame = self.bounds;
-    knobLayer.fillColor = nil;
-    knobLayer.strokeColor = self.knobColor.CGColor;
-    knobLayer.opacity = 1.f;
-    knobLayer.zPosition = 1.f;
-    knobLayer.lineWidth = self.knobWidth;
-    knobLayer.lineJoin = kCALineJoinMiter;
-    knobLayer.path = [[UIBezierPath bezierPathWithArcCenter:_centerPoint
-                                                     radius:_radius
-                                                 startAngle:0.f
-                                                   endAngle:TWOPI
-                                                  clockwise:YES] CGPath];
-    [self.layer addSublayer:knobLayer];
-    _knobLayer = knobLayer;
-    
-    CAShapeLayer *coronaLayer = [CAShapeLayer layer];
-    coronaLayer.frame = self.bounds;
-    coronaLayer.strokeColor = self.coronaColor.CGColor;
-    coronaLayer.fillColor = nil;
-    coronaLayer.opacity = 1.f;
-    coronaLayer.zPosition = 2.f;
-    coronaLayer.lineWidth = self.coronaWidth;
-    coronaLayer.lineJoin = kCALineJoinMiter;
-    coronaLayer.path = [[UIBezierPath bezierPathWithArcCenter:_centerPoint
-                                                      radius:_radius
-                                                  startAngle:_startAngle
-                                                    endAngle:_endAngle - ANGLE_EPSILON
-                                                   clockwise:YES] CGPath];
-    [self.layer addSublayer:coronaLayer];
-    _coronaLayer = coronaLayer;
-    _coronaLayer.strokeEnd = 0.f;
-    // NOTE: Turn off implicit animation for strokeColor, because it will interfere with
-    // the corona path animation for the special case when the knob is touched during animation
-    // when the value returns to 0. See note in draw animated method.
-    _coronaLayer.actions = @{@"strokeColor": [NSNull null]};
-    
-    // Value label added last as a subview so it appears over the top of the other layers.
-    UILabel *valueLabel = [[UILabel alloc] init];
-    valueLabel.font = [UIFont systemFontOfSize:11.f];
-    valueLabel.textColor = self.coronaColor;
-    valueLabel.textAlignment = NSTextAlignmentCenter;
-    valueLabel.frame = self.bounds;
-    [self addSubview:valueLabel];
-    _valueLabel = valueLabel;
-    
-    [self cf_updateCoronaStringForValue];
     [super didMoveToSuperview];
 }
 
