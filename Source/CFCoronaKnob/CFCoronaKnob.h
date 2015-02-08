@@ -39,9 +39,12 @@
 
 
 typedef NS_OPTIONS(NSUInteger, CFCoronaKnobValueWrapping) {
-	CFCoronaKnobValueWrapNone, /*! No wrapping; value is clamped to [0.0..1.0). */
-	CFCoronaKnobValueWrapPositive, /*! Value wraps around when it exceeds 1.0. */
-	CFCoronaKnobValueWrapNegative, /*! Value wraps around when it is less than 0.0. */
+    /*! No wrapping; value is clamped to [0.0..1.0). */
+	CFCoronaKnobValueWrapNone,
+    /*! Value wraps around when it exceeds 1.0. */
+	CFCoronaKnobValueWrapPositive,
+    /*! Value wraps around when it is less than 0.0. */
+	CFCoronaKnobValueWrapNegative,
 };
 
 

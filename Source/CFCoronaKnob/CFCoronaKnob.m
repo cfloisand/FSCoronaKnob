@@ -2,7 +2,7 @@
 //  File:		CFCoronaKnob.m
 //  Author:		Christian Floisand
 //	Created:	2014-06-30
-//	Modified:	2015-02-07
+//	Modified:	2015-02-08
 //
 
 #import <QuartzCore/QuartzCore.h>
@@ -32,6 +32,28 @@
 #define PRACTICALLY_EQUAL(num1, num2) (fabsf((num1) - (num2)) < ANGLE_EPSILON)
 
 
+inline static CGFloat
+_CalculateRadius(CGFloat knobSize, CGFloat coronaWidth)
+{
+    return (knobSize / 2.f) - coronaWidth;
+}
+
+inline static CGFloat
+_CalculateAngleRange(CGFloat startAngle, CGFloat endAngle)
+{
+    if (fabsf(endAngle - startAngle) < FLT_MIN) {
+        // NOTE: Prevents value wrapping when startAngle and endAngle are the same.
+        return (TWOPI - ANGLE_EPSILON);
+    } else {
+        CGFloat diff = endAngle - startAngle;
+        return (diff > TWOPI ? diff-TWOPI : (diff <= 0.f ? diff+TWOPI : diff));
+    }
+}
+
+
+//_____________________________________________________________________________________
+#pragma mark - CFCoronaKnob
+
 @interface CFCoronaKnob () {
     CGPoint _centerPoint;
 	CGFloat _prevValue;
@@ -41,7 +63,6 @@
     BOOL _isDragging;
     CGFloat _dragCounter;
 }
-@property (nonatomic, copy) CGFloat (^calculateAngleRange)(void);
 @end
 
 
@@ -77,25 +98,13 @@
         _knobBackgroundColor = DEFAULT_BACKGROUND_COLOR;
 		_knobWidth = DEFAULT_KNOB_WIDTH;
         _coronaWidth = DEFAULT_CORONA_WIDTH;
+        _radius = _CalculateRadius(frame.size.width, _coronaWidth);
 		_valueWrapping = CFCoronaKnobValueWrapNone;
-        _radius = self.bounds.size.width / 2.f - _coronaWidth;
 		_prevValue = _value;
         
         _isDragging = NO;
         _tapped = YES;
         _dragCounter = 0.f;
-        
-        __weak typeof(self) weakSelf = self;
-        _calculateAngleRange = ^CGFloat (void) {
-            typeof(self) strongSelf = weakSelf;
-            if (fabsf(strongSelf.endAngle - strongSelf.startAngle) < FLT_MIN) {
-                // NOTE: Prevents value wrapping when startAngle and endAngle are the same.
-                return (TWOPI - ANGLE_EPSILON);
-            } else {
-                CGFloat diff = strongSelf.endAngle - strongSelf.startAngle;
-                return (diff > TWOPI ? diff-TWOPI : (diff <= 0.f ? diff+TWOPI : diff));
-            }
-        };
         
         self.opaque = NO;
 		self.backgroundColor = [UIColor clearColor];
@@ -109,31 +118,19 @@
         _centerPoint = [self.superview convertPoint:self.center toView:self];
         
         CAShapeLayer *backLayer = [CAShapeLayer layer];
-        // NOTE: Inset the background layer to make sure it doesn't spill out beyond the knob.
-        CGFloat insetAmount = MAX(_knobWidth, _coronaWidth) + 0.5f;
-        CGPathRef backPath = CGPathCreateWithEllipseInRect(CGRectInset(self.bounds, insetAmount, insetAmount), NULL);
-        backLayer.frame = self.bounds;
         backLayer.fillColor = self.knobBackgroundColor.CGColor;
         backLayer.opacity = 1.f;
         backLayer.zPosition = 0.f;
-        backLayer.path = backPath;
         [self.layer addSublayer:backLayer];
         _backgroundLayer = backLayer;
-        CGPathRelease(backPath);
         
         CAShapeLayer *knobLayer = [CAShapeLayer layer];
-        knobLayer.frame = self.bounds;
         knobLayer.fillColor = nil;
         knobLayer.strokeColor = self.knobColor.CGColor;
         knobLayer.opacity = 1.f;
         knobLayer.zPosition = 1.f;
         knobLayer.lineWidth = self.knobWidth;
         knobLayer.lineJoin = kCALineJoinMiter;
-        knobLayer.path = [[UIBezierPath bezierPathWithArcCenter:_centerPoint
-                                                         radius:_radius
-                                                     startAngle:0.f
-                                                       endAngle:TWOPI
-                                                      clockwise:YES] CGPath];
         [self.layer addSublayer:knobLayer];
         _knobLayer = knobLayer;
         
@@ -167,6 +164,8 @@
         [self addSubview:valueLabel];
         _valueLabel = valueLabel;
         
+        [self cf_setBackgroundLayerMetrics];
+        [self cf_setKnobLayerMetrics];
         [self cf_updateCoronaStringForValue];
     }
     
@@ -203,13 +202,13 @@
 - (void)setStartAngle:(CGFloat)startAngle
 {
 	_startAngle = startAngle;
-    _angleRange = self.calculateAngleRange();
+    _angleRange = _CalculateAngleRange(_startAngle, _endAngle);
 }
 
 - (void)setEndAngle:(CGFloat)endAngle
 {
 	_endAngle = endAngle;
-	_angleRange = self.calculateAngleRange();
+	_angleRange = _CalculateAngleRange(_startAngle, _endAngle);
 }
 
 - (void)setValue:(CGFloat)value
@@ -223,6 +222,13 @@
 	}
     
     [self cf_updateCoronaColorForValue];
+    [self cf_updateCoronaStringForValue];
+    
+    if (_tapped) {
+        [self cf_drawAnimateCorona];
+    } else {
+        [self cf_drawImmediateCorona];
+    }
 }
 
 - (void)setTapIncrement:(CGFloat)tapIncrement
@@ -250,6 +256,8 @@
 	if (_highlightLayer) {
 		_highlightLayer.lineWidth = knobWidth;
 	}
+    
+    [self cf_setBackgroundLayerMetrics];
 }
 
 - (void)setCoronaWidth:(CGFloat)coronaWidth
@@ -258,6 +266,9 @@
 	if (_coronaLayer) {
 		_coronaLayer.lineWidth = coronaWidth;
 	}
+    
+    _radius = _CalculateRadius(self.frame.size.width, _coronaWidth);
+    [self cf_setBackgroundLayerMetrics];
 }
 
 - (void)setKnobColor:(UIColor *)knobColor
@@ -283,16 +294,34 @@
 
 - (void)setFrame:(CGRect)frame
 {
+    if (CGRectEqualToRect(frame, self.frame)) {
+        return;
+    }
+    
     NSAssert(frame.size.width == frame.size.height, @"Corona Knob's width and height must be the same.");
+    
     super.frame = frame;
-    _radius = self.bounds.size.width / 2.f - _coronaWidth;
+    _valueLabel.frame = self.bounds;
+    _radius = _CalculateRadius(self.frame.size.width, _coronaWidth);
+    
+    [self cf_setBackgroundLayerMetrics];
+    [self cf_setKnobLayerMetrics];
 }
 
 - (void)setBounds:(CGRect)bounds
 {
+    if (CGRectEqualToRect(bounds, self.bounds)) {
+        return;
+    }
+    
     NSAssert(bounds.size.width == bounds.size.height, @"Corona Knob's width and height must be the same.");
+    
     super.bounds = bounds;
-    _radius = self.bounds.size.width / 2.f - _coronaWidth;
+    _valueLabel.frame = self.bounds;
+    _radius = _CalculateRadius(self.frame.size.width, _coronaWidth);
+    
+    [self cf_setBackgroundLayerMetrics];
+    [self cf_setKnobLayerMetrics];
 }
 
 - (void)setBackgroundColor:(UIColor *)backgroundColor
@@ -310,8 +339,6 @@
 {
     self.value = 0.f;
     _dragCounter = 0.f;
-    [self cf_drawImmediateCorona];
-    [self cf_updateCoronaStringForValue];
 }
 
 - (void)setValueLabelFont:(UIFont *)font
@@ -356,6 +383,9 @@
     }
     
     if (touch.view == self && _dragIncrement > 0.f) {
+        _isDragging = YES;
+        _tapped = NO;
+        
         CGFloat diffX = [touch locationInView:self].x - [touch previousLocationInView:self].x;
         // Swap y direction so that dragging up increases knob's value and dragging down decreases it.
         CGFloat diffY = [touch previousLocationInView:self].y - [touch locationInView:self].y;
@@ -374,11 +404,6 @@
                 _dragCounter += 1.f;
             }
         }
-        
-        _isDragging = YES;
-        _tapped = NO;
-		[self cf_drawImmediateCorona];
-        [self cf_updateCoronaStringForValue];
     }
     
     [super touchesMoved:touches withEvent:event];
@@ -395,18 +420,16 @@
     CGPoint touchPoint = [touch locationInView:self];
     
     if ([self pointInside:touchPoint withEvent:event] && !_isDragging) {
+        _tapped = YES;
+        _isDragging = NO;
 		if (self.value < 1.f) {
 			self.value += _tapIncrement;
-			[self cf_drawAnimateCorona];
-            [self cf_updateCoronaStringForValue];
 		}
         
         _dragCounter = 0.f;
     }
     
-    _tapped = (_isDragging ? NO : YES);
     _isDragging = NO;
-	
 	_highlightLayer.hidden = YES;
 	[_highlightLayer setNeedsDisplay];
     
@@ -472,7 +495,7 @@
     strokeAnimation.fillMode = kCAFillModeForwards;
     strokeAnimation.beginTime = 0.0;
     
-    if (valueIsZero) {
+    if (valueIsZero && (self.valueWrapping & CFCoronaKnobValueWrapPositive)) {
         strokeAnimation.duration *= 2;
         CABasicAnimation *fadeAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
         fadeAnimation.duration = strokeAnimation.duration;
@@ -500,6 +523,26 @@
     
     [_coronaLayer addAnimation:coronaAnimation forKey:CORONA_ANIMATION_KEY];
 	_prevValue = _value;
+}
+
+- (void)cf_setBackgroundLayerMetrics
+{
+    // NOTE: Inset the background layer to make sure it doesn't spill out beyond the knob.
+    CGFloat insetAmount = MAX(_knobWidth, _coronaWidth) + 0.5f;
+    CGPathRef backPath = CGPathCreateWithEllipseInRect(CGRectInset(self.bounds, insetAmount, insetAmount), NULL);
+    _backgroundLayer.frame = self.bounds;
+    _backgroundLayer.path = backPath;
+    CGPathRelease(backPath);
+}
+
+- (void)cf_setKnobLayerMetrics
+{
+    _knobLayer.frame = self.bounds;
+    _knobLayer.path = [[UIBezierPath bezierPathWithArcCenter:_centerPoint
+                                                      radius:_radius
+                                                  startAngle:0.f
+                                                    endAngle:TWOPI
+                                                   clockwise:YES] CGPath];
 }
 
 @end
