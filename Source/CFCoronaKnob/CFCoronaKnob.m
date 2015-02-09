@@ -185,6 +185,7 @@ _CalculateAngleRange(CGFloat startAngle, CGFloat endAngle)
 
 - (void)setNeedsDisplay
 {
+    self.value = self.value; // NOTE: Force knob to draw.
     [self cf_updateCoronaStringForValue];
     [self cf_updateCoronaColorForValue];
     [super setNeedsDisplay];
@@ -217,7 +218,7 @@ _CalculateAngleRange(CGFloat startAngle, CGFloat endAngle)
 	
 	if (_value >= 1.f) {
 		_value = (self.valueWrapping & CFCoronaKnobValueWrapPositive ? _value-1.f : 1.f);
-	} else if (_value < 0.f) {
+	} else if (_value <= 0.f) {
 		_value = (self.valueWrapping & CFCoronaKnobValueWrapNegative ? _value+1.f : 0.f);
 	}
     
