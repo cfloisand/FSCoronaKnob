@@ -2,7 +2,7 @@
 //  File:		CFCoronaKnob.m
 //  Author:		Christian Floisand
 //	Created:	2014-06-30
-//	Modified:	2015-02-08
+//	Modified:	2015-04-29
 //
 
 #import <QuartzCore/QuartzCore.h>
@@ -481,20 +481,26 @@ _CalculateAngleRange(CGFloat startAngle, CGFloat endAngle)
         strokeTarget = _endAngle - ANGLE_EPSILON;
     }
     
-    // NOTE: Removing an animation that may currently be running from a previous tap
-    // ensures correct animation. E.g. when the value is 0 (and the start/end anges are the same),
-    // the animation would otherwise be interpolated in reverse to reach the current value
-    // set for this tap.
-    if ([_coronaLayer animationForKey:CORONA_ANIMATION_KEY])
-        [_coronaLayer removeAnimationForKey:CORONA_ANIMATION_KEY];
-    _coronaLayer.strokeEnd = _value;
-	
     CAAnimationGroup *coronaAnimation = [CAAnimationGroup animation];
     CABasicAnimation *strokeAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
     strokeAnimation.duration = CORONA_ANIMATION_DURATION;
     strokeAnimation.toValue = @(strokeTarget);
     strokeAnimation.fillMode = kCAFillModeForwards;
     strokeAnimation.beginTime = 0.0;
+    
+    // NOTE: Removing an animation that may currently be running from a previous tap
+    // ensures correct animation. E.g. when the value is 0 (and the start/end anges are the same),
+    // the animation would otherwise be interpolated in reverse to reach the current value
+    // set for this tap.
+    if ([_coronaLayer animationForKey:CORONA_ANIMATION_KEY]) {
+        [_coronaLayer removeAllAnimations];
+        
+        if (PRACTICALLY_ZERO(_prevValue)) {
+            strokeAnimation.fromValue = @(0.0);
+        }
+    }
+    
+    _coronaLayer.strokeEnd = _value;
     
     if (valueIsZero && (self.valueWrapping & CFCoronaKnobValueWrapPositive)) {
         strokeAnimation.duration *= 2;
