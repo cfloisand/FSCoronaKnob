@@ -28,8 +28,8 @@
 #define DEFAULT_KNOB_WIDTH		4.f
 #define DEFAULT_CORONA_WIDTH    4.f
 
-#define PRACTICALLY_ZERO(num)   (((num) < VALUE_MIN) || (fabsf(1.f - (num)) < VALUE_MIN))
-#define PRACTICALLY_EQUAL(num1, num2) (fabsf((num1) - (num2)) < ANGLE_EPSILON)
+#define PRACTICALLY_ZERO(num)   (((num) < VALUE_MIN) || (fabs(1.f - (num)) < VALUE_MIN))
+#define PRACTICALLY_EQUAL(num1, num2) (fabs((num1) - (num2)) < ANGLE_EPSILON)
 
 
 inline static CGFloat
@@ -41,7 +41,7 @@ _CalculateRadius(CGFloat knobSize, CGFloat coronaWidth)
 inline static CGFloat
 _CalculateAngleRange(CGFloat startAngle, CGFloat endAngle)
 {
-    if (fabsf(endAngle - startAngle) < FLT_MIN) {
+    if (fabs(endAngle - startAngle) < FLT_MIN) {
         // NOTE: Prevents value wrapping when startAngle and endAngle are the same.
         return (TWOPI - ANGLE_EPSILON);
     } else {
@@ -353,8 +353,6 @@ _CalculateAngleRange(CGFloat startAngle, CGFloat endAngle)
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-	[super touchesBegan:touches withEvent:event];
-	
 	if ( ! _highlightLayer ) {
 		CAShapeLayer *highlightLayer = [CAShapeLayer layer];
 		CGPathRef highlightPath = CGPathCreateCopy(_knobLayer.path);
@@ -390,7 +388,7 @@ _CalculateAngleRange(CGFloat startAngle, CGFloat endAngle)
         CGFloat diffX = [touch locationInView:self].x - [touch previousLocationInView:self].x;
         // Swap y direction so that dragging up increases knob's value and dragging down decreases it.
         CGFloat diffY = [touch previousLocationInView:self].y - [touch locationInView:self].y;
-        CGFloat diff = (fabsf(diffX) >= fabsf(diffY) ? diffX : diffY);
+        CGFloat diff = (fabs(diffX) >= fabs(diffY) ? diffX : diffY);
         
         if (diff > 0.f) {
             _dragCounter += _dragSensitivity;
@@ -406,8 +404,6 @@ _CalculateAngleRange(CGFloat startAngle, CGFloat endAngle)
             }
         }
     }
-    
-    [super touchesMoved:touches withEvent:event];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -433,8 +429,6 @@ _CalculateAngleRange(CGFloat startAngle, CGFloat endAngle)
     _isDragging = NO;
 	_highlightLayer.hidden = YES;
 	[_highlightLayer setNeedsDisplay];
-    
-    [super touchesEnded:touches withEvent:event];
 }
 
 #pragma mark - Private methods

@@ -18,8 +18,9 @@
 
 @implementation CFViewController
 
-- (void)awakeFromNib
-{
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    
     self.coronaKnob1 = [[CFCoronaKnob alloc] initWithFrame:CGRectMake(20.f, 50.f, 44.f, 44.f)];
     self.coronaKnob1.valueWrapping = CFCoronaKnobValueWrapPositive | CFCoronaKnobValueWrapNegative;
     //self.coronaKnob1.tapIncrement = 0.15f;
@@ -46,27 +47,23 @@
     [self.view addSubview:self.coronaKnob3];
 }
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
 }
 
-- (void)didReceiveMemoryWarning
-{
+- (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
-- (void)knobTouch:(id)sender
-{
+- (void)knobTouch:(id)sender {
     //NSLog(@"knob touched");
 }
 
 #pragma mark - CFCoronaKnobDelegate
 
-- (NSString *)coronaKnob:(CFCoronaKnob *)knob stringForValue:(CGFloat)value
-{
+- (NSString *)coronaKnob:(CFCoronaKnob *)knob stringForValue:(CGFloat)value {
     if (knob == self.coronaKnob3 && knob.tapped) {
         if (value == 0.f || value == 1.f) {
             return @":00";
@@ -82,12 +79,9 @@
     return @"";
 }
 
-
-- (UIColor *)coronaKnob:(CFCoronaKnob *)knob coronaColorForValue:(CGFloat)value
-{
+- (UIColor *)coronaKnob:(CFCoronaKnob *)knob coronaColorForValue:(CGFloat)value {
 	UIColor *color = [UIColor colorWithRed:0.f green:value blue:value alpha:1.f];
 	return color;
 }
-
 
 @end
