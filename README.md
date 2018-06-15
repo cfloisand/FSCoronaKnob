@@ -7,6 +7,9 @@ This knob is a circular control with a colored corona that represents its value.
 
 Requires iOS SDK 7.0+ and ARC. 
 
+## Installation
+Simply download this repository and copy _FSCoronaKnob.h_ & _FSCoronaKnob.m_ into your project.
+
 ## Usage
 Initialize a corona knob with a size and a delegate if desired:
 ```
