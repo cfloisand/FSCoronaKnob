@@ -1,18 +1,17 @@
 //
 //  main.m
-//  CFCoronaKnob
+//  FSCoronaKnob
 //
 //  Created by Christian on 2014-06-30.
-//  Copyright (c) 2014 Rainland. All rights reserved.
+//  Copyright (c) 2014 Flyingsand. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
-
-#import "CFAppDelegate.h"
+#import "AppDelegate.h"
 
 int main(int argc, char * argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CFAppDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
     }
 }

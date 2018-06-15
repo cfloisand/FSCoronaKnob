@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:CFCoronaKnob.xcodeproj">
+      location = "self:/Users/Flyingsand/Programming/Open Source/CFCoronaKnob/FSCoronaKnob.xcodeproj">
    </FileRef>
 </Workspace>

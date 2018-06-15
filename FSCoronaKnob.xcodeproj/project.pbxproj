@@ -1,0 +1,323 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		35724C2A20D422E700239F44 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 35724C2920D422E700239F44 /* Launch Screen.storyboard */; };
+		35724C2C20D4236100239F44 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 35724C2B20D4236100239F44 /* Assets.xcassets */; };
+		5CC6F25019619D3D00C767E3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5CC6F24F19619D3D00C767E3 /* main.m */; };
+		5CC6F25419619D3D00C767E3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5CC6F25319619D3D00C767E3 /* AppDelegate.m */; };
+		5CC6F25A19619D3D00C767E3 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5CC6F25919619D3D00C767E3 /* ViewController.m */; };
+		5CC6F27B19619E9E00C767E3 /* FSCoronaKnob.m in Sources */ = {isa = PBXBuildFile; fileRef = 5CC6F27A19619E9E00C767E3 /* FSCoronaKnob.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		35724C2920D422E700239F44 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		35724C2B20D4236100239F44 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5C1C12E31A095DA4006F4E27 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		5C1C12E41A0962D9006F4E27 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		5CC6F24019619D3D00C767E3 /* FSCoronaKnob.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FSCoronaKnob.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5CC6F24B19619D3D00C767E3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Source/Info.plist; sourceTree = SOURCE_ROOT; };
+		5CC6F24F19619D3D00C767E3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Source/main.m; sourceTree = SOURCE_ROOT; };
+		5CC6F25219619D3D00C767E3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Source/AppDelegate.h; sourceTree = SOURCE_ROOT; };
+		5CC6F25319619D3D00C767E3 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Source/AppDelegate.m; sourceTree = SOURCE_ROOT; };
+		5CC6F25819619D3D00C767E3 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ViewController.h; path = Source/ViewController.h; sourceTree = SOURCE_ROOT; };
+		5CC6F25919619D3D00C767E3 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ViewController.m; path = Source/ViewController.m; sourceTree = SOURCE_ROOT; };
+		5CC6F27919619E9E00C767E3 /* FSCoronaKnob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FSCoronaKnob.h; path = Source/FSCoronaKnob.h; sourceTree = SOURCE_ROOT; };
+		5CC6F27A19619E9E00C767E3 /* FSCoronaKnob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FSCoronaKnob.m; path = Source/FSCoronaKnob.m; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5CC6F23D19619D3D00C767E3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5CC6F23719619D3D00C767E3 = {
+			isa = PBXGroup;
+			children = (
+				5CC6F24919619D3D00C767E3 /* Source */,
+				5CC6F24119619D3D00C767E3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5CC6F24119619D3D00C767E3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5CC6F24019619D3D00C767E3 /* FSCoronaKnob.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5CC6F24919619D3D00C767E3 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				5CC6F27819619E5D00C767E3 /* FSCoronaKnob */,
+				5CC6F25219619D3D00C767E3 /* AppDelegate.h */,
+				5CC6F25319619D3D00C767E3 /* AppDelegate.m */,
+				5CC6F25819619D3D00C767E3 /* ViewController.h */,
+				5CC6F25919619D3D00C767E3 /* ViewController.m */,
+				5CC6F24B19619D3D00C767E3 /* Info.plist */,
+				35724C2B20D4236100239F44 /* Assets.xcassets */,
+				35724C2920D422E700239F44 /* Launch Screen.storyboard */,
+				5CC6F24A19619D3D00C767E3 /* Supporting Files */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		5CC6F24A19619D3D00C767E3 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				5C1C12E31A095DA4006F4E27 /* README.md */,
+				5C1C12E41A0962D9006F4E27 /* LICENSE */,
+				5CC6F24F19619D3D00C767E3 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		5CC6F27819619E5D00C767E3 /* FSCoronaKnob */ = {
+			isa = PBXGroup;
+			children = (
+				5CC6F27919619E9E00C767E3 /* FSCoronaKnob.h */,
+				5CC6F27A19619E9E00C767E3 /* FSCoronaKnob.m */,
+			);
+			name = FSCoronaKnob;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5CC6F23F19619D3D00C767E3 /* FSCoronaKnob */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5CC6F27219619D3E00C767E3 /* Build configuration list for PBXNativeTarget "FSCoronaKnob" */;
+			buildPhases = (
+				5CC6F23C19619D3D00C767E3 /* Sources */,
+				5CC6F23D19619D3D00C767E3 /* Frameworks */,
+				5CC6F23E19619D3D00C767E3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FSCoronaKnob;
+			productName = CFCoronaKnob;
+			productReference = 5CC6F24019619D3D00C767E3 /* FSCoronaKnob.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5CC6F23819619D3D00C767E3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = CF;
+				LastUpgradeCheck = 0940;
+				ORGANIZATIONNAME = Rainland;
+				TargetAttributes = {
+					5CC6F23F19619D3D00C767E3 = {
+						DevelopmentTeam = VAA7YY5ZEU;
+					};
+				};
+			};
+			buildConfigurationList = 5CC6F23B19619D3D00C767E3 /* Build configuration list for PBXProject "FSCoronaKnob" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 5CC6F23719619D3D00C767E3;
+			productRefGroup = 5CC6F24119619D3D00C767E3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5CC6F23F19619D3D00C767E3 /* FSCoronaKnob */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5CC6F23E19619D3D00C767E3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				35724C2C20D4236100239F44 /* Assets.xcassets in Resources */,
+				35724C2A20D422E700239F44 /* Launch Screen.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5CC6F23C19619D3D00C767E3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CC6F25019619D3D00C767E3 /* main.m in Sources */,
+				5CC6F25419619D3D00C767E3 /* AppDelegate.m in Sources */,
+				5CC6F27B19619E9E00C767E3 /* FSCoronaKnob.m in Sources */,
+				5CC6F25A19619D3D00C767E3 /* ViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		5CC6F27019619D3E00C767E3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		5CC6F27119619D3E00C767E3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		5CC6F27319619D3E00C767E3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = VAA7YY5ZEU;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "$(SRCROOT)/Source/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = com.flyingsand.FSCoronaKnob;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		5CC6F27419619D3E00C767E3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = VAA7YY5ZEU;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "$(SRCROOT)/Source/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = com.flyingsand.FSCoronaKnob;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5CC6F23B19619D3D00C767E3 /* Build configuration list for PBXProject "FSCoronaKnob" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5CC6F27019619D3E00C767E3 /* Debug */,
+				5CC6F27119619D3E00C767E3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5CC6F27219619D3E00C767E3 /* Build configuration list for PBXNativeTarget "FSCoronaKnob" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5CC6F27319619D3E00C767E3 /* Debug */,
+				5CC6F27419619D3E00C767E3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 5CC6F23819619D3D00C767E3 /* Project object */;
+}

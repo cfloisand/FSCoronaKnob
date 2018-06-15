@@ -1,4 +1,4 @@
-# CFCoronaKnob #
+# FSCoronaKnob #
 
 ## Corona Knob Control for iOS ##
 
@@ -15,7 +15,7 @@ See example app within project for usage.
 
 ---
 
-Copyright (C) 2014  Christian Floisand
+Copyright (C) 2014  Flyingsand
 
 This program is free software: you can redistribute it and/or modify it under the terms 
 of the GNU General Public License as published by the Free Software Foundation, either 
