@@ -71,6 +71,7 @@ FSCalculateKnobAngleRange(CGFloat startAngle, CGFloat endAngle) {
     BOOL _isInitializing;
 }
 
+#pragma mark <Lifecycle>
 - (instancetype)init {
 	return (self = [self initWithFrame:CGRectZero]);
 }
@@ -197,7 +198,34 @@ FSCalculateKnobAngleRange(CGFloat startAngle, CGFloat endAngle) {
     }
 }
 
-#pragma mark - Properties
+#pragma mark <Properties>
+- (void)setFrame:(CGRect)frame {
+    if (!CGRectEqualToRect(frame, self.frame)) {
+        NSAssert(frame.size.width == frame.size.height, @"Corona Knob's width and height must be the same.");
+        
+        super.frame = frame;
+        [self __updateLayout];
+    }
+}
+
+- (void)setBounds:(CGRect)bounds {
+    if (!CGRectEqualToRect(bounds, self.bounds)) {
+        NSAssert(bounds.size.width == bounds.size.height, @"Corona Knob's width and height must be the same.");
+        
+        super.bounds = bounds;
+        [self __updateLayout];
+    }
+}
+
+- (void)setBackgroundColor:(UIColor *)backgroundColor {
+    super.backgroundColor = [UIColor clearColor];
+}
+
+- (void)setOpaque:(BOOL)opaque {
+    // NOTE: Allowing the opaque property to be YES would mess up drawing of the control.
+    super.opaque = NO;
+}
+
 - (void)setDelegate:(id<FSCoronaKnobDelegate>)delegate {
     _delegate = delegate;
     [self __updateValueLabelAndCoronaColor];
@@ -281,61 +309,13 @@ FSCalculateKnobAngleRange(CGFloat startAngle, CGFloat endAngle) {
     _backgroundLayer.fillColor = knobBackgroundColor.CGColor;
 }
 
-- (void)setFrame:(CGRect)frame {
-    if (!CGRectEqualToRect(frame, self.frame)) {
-        NSAssert(frame.size.width == frame.size.height, @"Corona Knob's width and height must be the same.");
-        
-        super.frame = frame;
-        _valueLabel.frame = self.bounds;
-        _centerPoint = [self.superview convertPoint:self.center toView:self];
-        _radius = FSCalculateKnobRadius(self.frame.size.width, _coronaWidth);
-        
-        if (_widthConstraint) {
-            _widthConstraint.constant = self.frame.size.width;
-        }
-        if (_heightConstraint) {
-            _heightConstraint.constant = self.frame.size.height;
-        }
-        
-        [self __updateAllLayers];
-    }
-}
-
-- (void)setBounds:(CGRect)bounds {
-    if (!CGRectEqualToRect(bounds, self.bounds)) {
-        NSAssert(bounds.size.width == bounds.size.height, @"Corona Knob's width and height must be the same.");
-        
-        super.bounds = bounds;
-        _valueLabel.frame = self.bounds;
-        _centerPoint = [self.superview convertPoint:self.center toView:self];
-        _radius = FSCalculateKnobRadius(self.bounds.size.width, _coronaWidth);
-        
-        if (_widthConstraint) {
-            _widthConstraint.constant = self.bounds.size.width;
-        }
-        if (_heightConstraint) {
-            _heightConstraint.constant = self.bounds.size.height;
-        }
-        
-        [self __updateAllLayers];
-    }
-}
-
-- (void)setBackgroundColor:(UIColor *)backgroundColor {
-    super.backgroundColor = [UIColor clearColor];
-}
-
-- (void)setOpaque:(BOOL)opaque {
-    // NOTE: Allowing the opaque property to be YES would mess up drawing of the control.
-    super.opaque = NO;
-}
-
+#pragma mark <Public API>
 - (void)reset {
     self.value = 0.0;
     _dragCounter = 0.0;
 }
 
-#pragma mark - Interaction
+#pragma mark <Interaction>
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 	if (_highlightLayer == nil) {
 		CAShapeLayer *highlightLayer = [CAShapeLayer layer];
@@ -378,12 +358,14 @@ FSCalculateKnobAngleRange(CGFloat startAngle, CGFloat endAngle) {
             if (_dragCounter >= 1.0) {
                 self.value += _dragIncrement;
                 _dragCounter -= 1.0;
+                [self __valueChanged];
             }
         } else if (diff < 0.0) {
             _dragCounter -= _dragSensitivity;
             if (_dragCounter <= -1.0) {
                 self.value -= _dragIncrement;
                 _dragCounter += 1.0;
+                [self __valueChanged];
             }
         }
     }
@@ -403,6 +385,7 @@ FSCalculateKnobAngleRange(CGFloat startAngle, CGFloat endAngle) {
         _isDragging = NO;
 		if (self.value < 1.0) {
 			self.value += _tapIncrement;
+            [self __valueChanged];
 		}
         
         _dragCounter = 0.0;
@@ -413,7 +396,15 @@ FSCalculateKnobAngleRange(CGFloat startAngle, CGFloat endAngle) {
 	[_highlightLayer setNeedsDisplay];
 }
 
-#pragma mark - Private methods
+#pragma mark <Private API>
+- (void)__valueChanged {
+    if (self.onValueChanged) {
+        self.onValueChanged(self);
+    }
+    
+    [self sendActionsForControlEvents:UIControlEventValueChanged];
+}
+
 - (void)__updateValueLabelAndCoronaColor {
     if (self.delegate && [self.delegate respondsToSelector:@selector(coronaKnob:stringForValue:)]) {
         _valueLabel.text = [self.delegate coronaKnob:self stringForValue:self.value];
@@ -505,6 +496,21 @@ FSCalculateKnobAngleRange(CGFloat startAngle, CGFloat endAngle) {
     }
     
     _prevValue = _value;
+}
+
+- (void)__updateLayout {
+    _valueLabel.frame = self.bounds;
+    _centerPoint = [self.superview convertPoint:self.center toView:self];
+    _radius = FSCalculateKnobRadius(self.frame.size.width, _coronaWidth);
+    
+    if (_widthConstraint) {
+        _widthConstraint.constant = self.frame.size.width;
+    }
+    if (_heightConstraint) {
+        _heightConstraint.constant = self.frame.size.height;
+    }
+    
+    [self __updateAllLayers];
 }
 
 - (void)__updateBackgroundLayer {

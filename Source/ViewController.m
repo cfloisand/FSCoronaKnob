@@ -35,8 +35,7 @@
     
     FSCoronaKnob *knob1 = [[FSCoronaKnob alloc] initWithSize:CGSizeMake(56.0, 56.0) delegate:nil];
     knob1.valueWrapping = FSCoronaKnobValueWrapPositive | FSCoronaKnobValueWrapNegative;
-    //self.coronaKnob1.tapIncrement = 0.15f;
-    [knob1 addTarget:self action:@selector(__knobTouch:) forControlEvents:UIControlEventTouchUpInside];
+    [knob1 addTarget:self action:@selector(__knobValueChanged:) forControlEvents:UIControlEventValueChanged];
     [self.view addSubview:knob1];
     [knob1.leadingAnchor constraintEqualToAnchor:knob1.superview.leadingAnchor constant:20.0].active = YES;
     [knob1.centerYAnchor constraintEqualToAnchor:knob1.superview.centerYAnchor].active = YES;
@@ -49,7 +48,6 @@
     knob2.coronaWidth = 3.0;
     knob2.valueWrapping = FSCoronaKnobValueWrapNone;
     knob2.knobBackgroundColor = [UIColor colorWithRed:0.f green:146.f/255.f blue:210.f/255.f alpha:0.1f];
-    [knob2 addTarget:self action:@selector(__knobTouch:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:knob2];
     [knob2.leadingAnchor constraintEqualToAnchor:knob1.trailingAnchor constant:40.0].active = YES;
     [knob2.centerYAnchor constraintEqualToAnchor:knob2.superview.centerYAnchor].active = YES;
@@ -63,11 +61,14 @@
     knob3.valueWrapping = FSCoronaKnobValueWrapPositive;
     knob3.knobBackgroundColor = [UIColor colorWithWhite:0.17 alpha:0.08];
     knob3.valueLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:24.0];
-    [knob3 addTarget:self action:@selector(__knobTouch:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:knob3];
     [knob3.leadingAnchor constraintEqualToAnchor:knob2.trailingAnchor constant:40.0].active = YES;
     [knob3.centerYAnchor constraintEqualToAnchor:knob3.superview.centerYAnchor].active = YES;
     _knob3 = knob3;
+    
+    knob3.onValueChanged = ^void(FSCoronaKnob *knob) {
+        NSLog(@"knob (tag %ld) value: %f", knob.tag, knob.value);
+    };
 }
 
 - (void)didReceiveMemoryWarning {
@@ -75,18 +76,19 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)__knobTouch:(id)sender {
-    //NSLog(@"knob touched");
+- (void)__knobValueChanged:(id)sender {
+    FSCoronaKnob *knob = sender;
+    NSLog(@"knob value: %f", knob.value);
 }
 
 #pragma mark - FSCoronaKnobDelegate
 - (NSString *)coronaKnob:(FSCoronaKnob *)knob stringForValue:(CGFloat)value {
     if (knob.tag == KNOB3_TAG) {
-        if (value == 0.f || value == 1.f) {
+        if (value == 0.0 || value == 1.0) {
             return @":00";
-        } else if (value == 0.25f) {
+        } else if (value == 0.25) {
             return @":15";
-        } else if (value == 0.5f) {
+        } else if (value == 0.5) {
             return @":30";
         } else {
             return @":45";

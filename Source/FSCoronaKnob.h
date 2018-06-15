@@ -85,6 +85,8 @@ typedef NS_OPTIONS(NSUInteger, FSCoronaKnobValueWrapping) {
 
 @property (nonatomic, weak) id<FSCoronaKnobDelegate> delegate;
 
+@property (nonatomic, copy) void(^onValueChanged)(FSCoronaKnob*);
+
 
 /*! @brief Initializes the corona knob with the given size and delegate. \c delegate may be nil. */
 - (instancetype)initWithSize:(CGSize)size delegate:(id<FSCoronaKnobDelegate>)delegate;
